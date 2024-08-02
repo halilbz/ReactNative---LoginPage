@@ -9,25 +9,42 @@ import {
       Image,
     } from 'react-native';
   
-    import React, {useState} from 'react';
-    import {Loading,CustomTextInput,CustomButton} from '../components';
     
+    import {Loading,CustomTextInput,CustomButton} from '../components';
+    import {login,autoLogin} from '../redux/userSlice';//userslice dan gelen logini ekledim.
+
+    import { useSelector,useDispatch } from 'react-redux';//sliceleri kullanmak için
+    import { setIsLoading,} from '../redux/userSlice';
+    import React,{ useState,useEffect } from 'react';
+    
+
   const LoginPage = ({navigation}) => {//navigation kullanacam dedim
   //useState yapısıyla formlardan girilen bilgileri alıp kullanabiliriz.
+    
+    const [email,setEmail] = useState('');
+    const [password,setPassword ] = useState('');
+
   
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [result, setResult] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
+    
+
+    //userSlice içerisindeki verilerin okunması
+    const {/* email, password, */ isLoading,error} = useSelector((state)=>state.user)
+
+   
+    //userSlice içerisindeki reducer yapılarını kullanma veya veri gönderme
+    const dispatch = useDispatch()
   
-  
+    //Kullanıcı daha önce giriş yaptıysa kontrol et ve oto giriş yap
+    useEffect(() => {
+      dispatch(autoLogin())//
+    }, [])
   
     //console.log(email)
   
   
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome {result}</Text>
+        <Text style={styles.welcome}>Welcome</Text>
       <Image 
       
       source={require('../../assets/images/login.png')}
@@ -36,22 +53,22 @@ import {
         <CustomTextInput
           title="Email"
           isSecureText={false}
-          handleOnChangeText={setEmail}//içindeki yazıyı değiştircek yapı
+          handleOnChangeText={(text)=> setEmail(text.toLowerCase())}//içindeki yazıyı değiştircek yapı
           handleValue={email}//içinde gözükecek yazı
           handlePlaceholder='Enter Your Email'
         />
         <CustomTextInput
           title="Password"
           isSecureText={true}
-          handleOnChangeText={setPassword}//içindeki yazıyı değiştircek yapı
+          handleOnChangeText={(password)=> setPassword(password)}//içindeki yazıyı değiştircek yapı
           handleValue={password}//içinde gözükecek yazı 
           handlePlaceholder='Enter Your Password '
         />
-       
+       <Text>{error}</Text>
         <CustomButton
           buttonText = "Login"
           setWidth='80%'
-          handleOnPress={()=> setIsLoading(true)}
+          handleOnPress={()=> dispatch(login({email,password}))}
           buttonColor="rebeccapurple"
           pressedButtonColor="gray"
         />
@@ -66,7 +83,7 @@ import {
 
       
         {/* Eğer isloading true ise changeloading'i çağır ve false yap */}
-      {isLoading ? <Loading changeIsLoading={()=> setIsLoading(false)}/> : null}
+      {isLoading ? <Loading changeIsLoading={()=> dispatch(setIsLoading(false))}/> : null}
   
       
       </View>
